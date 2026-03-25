@@ -1,0 +1,53 @@
+name: 🏠 Agent Fotocasa Diari
+
+on:
+  schedule:
+    # Cada dia a les 8:00 AM (hora UTC = 9:00 AM hora Espanya estiu / 8:00 hivern)
+    - cron: '0 7 * * *'
+
+  # Permet executar manualment des de GitHub
+  workflow_dispatch:
+    inputs:
+      location:
+        description: 'Localització (ex: Barcelona, Madrid)'
+        required: false
+        default: 'Barcelona'
+
+jobs:
+  cercar-propietats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout del repositori
+        uses: actions/checkout@v4
+
+      # Restaurar el fitxer seen_ids.json de la caché
+      # (per recordar quines propietats ja hem vist entre execucions)
+      - name: 💾 Restaurar IDs vistos
+        uses: actions/cache@v4
+        with:
+          path: seen_ids.json
+          key: seen-ids-fotocasa-${{ vars.SEARCH_LOCATION || 'Barcelona' }}
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Instal·lar dependències
+        run: pip install requests
+
+      - name: 🔍 Executar agent
+        env:
+          APIFY_TOKEN:          ${{ secrets.APIFY_TOKEN }}
+          EMAIL_FROM:           ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD:       ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO:             ${{ secrets.EMAIL_TO }}
+          SEARCH_LOCATION:      ${{ inputs.location || vars.SEARCH_LOCATION || 'Barcelona' }}
+          SEARCH_OPERATION:     ${{ vars.SEARCH_OPERATION || 'rent' }}
+          SEARCH_TYPE:          ${{ vars.SEARCH_TYPE || 'homes' }}
+          SEARCH_MAX_ITEMS:     ${{ vars.SEARCH_MAX_ITEMS || '50' }}
+          SEARCH_MIN_PRICE:     ${{ vars.SEARCH_MIN_PRICE || '0' }}
+          SEARCH_MAX_PRICE:     ${{ vars.SEARCH_MAX_PRICE || '999999' }}
+          SEARCH_MIN_SIZE:      ${{ vars.SEARCH_MIN_SIZE || '0' }}
+        run: python agent.py
