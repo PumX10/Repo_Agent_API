@@ -16,7 +16,7 @@ import requests
 
 # ── Configuració (llegida des de variables d'entorn / GitHub Secrets) ──────────
 APIFY_TOKEN      = os.environ["APIFY_TOKEN"]
-ACTOR_ID         = "misceres~fotocasa-scraper"   # Actor Fotocasa a Apify
+ACTOR_ID         = "igolaizola~fotocasa-scraper"   # Actor Fotocasa a Apify
 
 EMAIL_FROM       = os.environ["EMAIL_FROM"]       # ex: agent@gmail.com
 EMAIL_PASSWORD   = os.environ["EMAIL_PASSWORD"]   # App Password de Gmail
